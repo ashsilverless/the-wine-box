@@ -183,5 +183,45 @@ return $translated_text;
 }
 add_filter( 'gettext', 'wc_billing_field_strings', 20, 3 );
 
+add_action( 'woocommerce_review_order_before_submit', 'rs_wc_custom_checkout_field' );
+function rs_wc_custom_checkout_field() {
+    echo '<div id="rs_wc_custom_checkout_field">';
 
+    woocommerce_form_field( 'nocheck', array(
+        'type'      => 'checkbox',
+        'class'     => array('input-checkbox'),
+        'label'     => __('Paperless Invoice'),
+    ),  WC()->checkout->get_value( 'nocheck' ) );
+    echo '</div>';
+}
 
+// Save the custom checkout field in the order meta
+
+add_action( 'woocommerce_checkout_update_order_meta', 'custom_checkout_field_update_order_meta', 10, 1 );
+function custom_checkout_field_update_order_meta( $order_id ) {
+
+    if ( ! empty( $_POST['nocheck'] ) )
+        update_post_meta( $order_id, 'nocheck', $_POST['nocheck'] );
+}
+
+// Display the custom field result on the order edit page
+
+add_action( 'woocommerce_admin_order_data_after_billing_address', 'display_custom_field_on_order_edit_pages', 10, 1 );
+function display_custom_field_on_order_edit_pages( $order ){
+    $nocheck = get_post_meta( $order->get_id(), 'nocheck', true );
+    if( $nocheck == 1 )
+        echo '<p><strong>Awesome checkbox: </strong> <span style="color:red;">Has been checked</span></p>';
+  elseif( $nocheck == 0 )
+    echo '<p><strong>Awesome checkbox: </strong> <span style="color:red;">Has not been checked</span></p>';
+}
+
+add_action( 'woocommerce_order_details_before_order_table', 'payment_disclaimer', 10 );
+
+function payment_disclaimer() { ?>
+  <div class="payment-disclaimer">
+    <h2>Payment Disclaimer</h2>
+    <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. </p>
+    <p>Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat.</p>
+  </div>
+  <?php
+}

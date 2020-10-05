@@ -43,7 +43,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <div class="payment-disclaimer">
   <h2>Payment Advice</h2>
-	<p>Please make sure to key in your correct card details as registered with your bank to avoid payment failures.</p>
+	<p>For card payments please make sure to key in your correct card details as registered with your bank to avoid payment failures.</p>
 </div>
 
 <?php do_action( 'woocommerce_receipt_' . $order->get_payment_method(), $order->get_id() ); ?>
